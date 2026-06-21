@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Omer Shoval Surf Clinics — Find Your Wave</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens (Claude / Anthropic system) ── */
+:root {
+  --primary:      #cc785c;
+  --primary-hov:  #a9583e;
+  --ink:          #141413;
+  --body:         #3d3d3a;
+  --body-strong:  #252523;
+  --muted:        #6c6a64;
+  --muted-soft:   #8e8b82;
+  --hairline:     #e6dfd8;
+  --canvas:       #faf9f5;
+  --surface-soft: #f5f0e8;
+  --surface-card: #efe9de;
+  --surface-dark: #181715;
+  --surface-dark-el: #252320;
+  --on-primary:   #ffffff;
+  --on-dark:      #faf9f5;
+  --on-dark-soft: #a09d96;
+  --success:      #4a9e66;
+  --success-bg:   #162b1e;
+  --warn-bg:      #2a1a0e;
+  --warn-fg:      #e8906a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--canvas);
+  color: var(--body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Typography helpers ── */
+.serif {
+  font-family: 'Cormorant Garamond', 'Tiempos Headline', Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+
+/* ── Hero ── */
+.hero {
+  background: var(--surface-dark);
+  color: var(--on-dark);
+  padding: 100px 24px 130px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(204,120,92,.18) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(93,184,166,.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 64px;
+  background: var(--canvas);
+  clip-path: polygon(
+    0 65%, 4% 44%, 9% 68%, 15% 40%, 21% 65%,
+    28% 42%, 35% 68%, 43% 40%, 51% 65%,
+    59% 42%, 67% 68%, 75% 40%, 83% 64%,
+    90% 42%, 95% 64%, 100% 48%, 100% 100%, 0 100%
+  );
+}
+.hero-inner { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
+.eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--on-dark-soft);
+  margin-bottom: 24px;
+}
+.hero h1 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(44px, 9vw, 80px);
+  font-weight: 400;
+  letter-spacing: -2px;
+  line-height: 1.02;
+  color: var(--on-dark);
+  margin-bottom: 22px;
+}
+.hero h1 em {
+  color: var(--primary);
+  font-style: italic;
+}
+.hero-sub {
+  font-size: 16px;
+  color: var(--on-dark-soft);
+  line-height: 1.65;
+  margin-bottom: 40px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  border-radius: 8px;
+  padding: 12px 22px;
+  height: 42px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .14s, color .14s, border-color .14s;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--primary); color: var(--on-primary); }
+.btn-primary:hover { background: var(--primary-hov); }
+.btn-ghost-dark {
+  background: var(--surface-dark-el);
+  color: var(--on-dark);
+  border: 1px solid rgba(255,255,255,.1);
+}
+.btn-ghost-dark:hover { background: rgba(255,255,255,.09); }
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--hairline);
+}
+.btn-ghost:hover { color: var(--ink); border-color: #c8bfb5; }
+
+/* ── Layout ── */
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px 100px; }
+
+/* ── Quiz card ── */
+.quiz {
+  background: var(--canvas);
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  padding: 36px 40px;
+  margin-top: -40px;
+  position: relative;
+  box-shadow: 0 2px 12px rgba(20,20,19,.07);
+}
+.quiz-header { margin-bottom: 30px; }
+.quiz-header h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: -0.4px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.quiz-header p { font-size: 14px; color: var(--muted); }
+
+.q { margin-bottom: 26px; }
+.qlabel {
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 11px;
+}
+.opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
+  transition: .13s;
+}
+.opt:hover { border-color: var(--primary); color: var(--primary); }
+.opt.sel { background: var(--surface-dark); border-color: var(--surface-dark); color: var(--on-dark); }
+.opt .e { font-size: 16px; }
+
+.quiz-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+}
+
+/* ── Results ── */
+.results { margin-top: 64px; }
+.results-head { margin-bottom: 28px; }
+.results-head h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 38px;
+  font-weight: 400;
+  letter-spacing: -0.6px;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+.results-head p { font-size: 14px; color: var(--muted); }
+
+.cards {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(315px, 1fr));
+}
+
+/* ── Clinic card ── */
+.card {
+  background: var(--canvas);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform .16s, box-shadow .16s;
+}
+.card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(20,20,19,.1); }
+
+.card-head {
+  background: var(--surface-dark);
+  padding: 22px 24px 20px;
+  position: relative;
+}
+.card-head h3 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--on-dark);
+  margin-bottom: 5px;
+  line-height: 1.2;
+}
+.card-head .loc { font-size: 13px; color: var(--on-dark-soft); }
+
+.match-badge {
+  position: absolute;
+  top: 14px; right: 14px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  padding: 3px 11px;
+  border-radius: 9999px;
+}
+
+.card-body { padding: 20px 24px; flex: 1; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.chip {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: var(--surface-card);
+  color: var(--ink);
+  letter-spacing: 0.1px;
+}
+.chip.level { background: var(--surface-dark-el); color: var(--on-dark-soft); }
+
+.card-desc { font-size: 14px; color: var(--body); line-height: 1.65; }
+.why { margin-top: 10px; font-size: 13px; color: var(--success); font-weight: 500; }
+
+.card-foot {
+  padding: 15px 24px;
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.status-tag {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  margin-bottom: 5px;
+}
+.s-full { background: var(--warn-bg); color: var(--warn-fg); }
+.s-open { background: var(--success-bg); color: var(--success); }
+.s-soon { background: var(--surface-card); color: var(--muted); }
+
+.price-label { font-size: 13px; color: var(--muted); }
+
+.book-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--primary);
+  color: var(--on-primary);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 18px;
+  border-radius: 8px;
+  white-space: nowrap;
+  transition: background .14s;
+  flex-shrink: 0;
+}
+.book-btn:hover { background: var(--primary-hov); }
+.book-btn.waitlist {
+  background: var(--surface-card);
+  color: var(--muted);
+}
+.book-btn.waitlist:hover { background: var(--hairline); color: var(--ink); }
+
+.none {
+  grid-column: 1 / -1;
+  background: var(--surface-card);
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ── CTA band ── */
+.cta-band {
+  background: var(--surface-dark);
+  border-radius: 12px;
+  padding: 60px 48px;
+  text-align: center;
+  margin-top: 64px;
+  position: relative;
+  overflow: hidden;
+}
+.cta-band::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 70% at 50% 120%, rgba(204,120,92,.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-band h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 40px;
+  font-weight: 400;
+  letter-spacing: -0.6px;
+  color: var(--on-dark);
+  margin-bottom: 12px;
+  position: relative;
+}
+.cta-band p {
+  font-size: 15px;
+  color: var(--on-dark-soft);
+  margin-bottom: 28px;
+  position: relative;
+}
+
+/* ── Footer ── */
+footer {
+  background: var(--surface-dark);
+  color: var(--on-dark-soft);
+  text-align: center;
+  padding: 48px 24px 40px;
+  font-size: 13px;
+}
+.footer-brand {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--on-dark);
+  margin-bottom: 8px;
+  display: block;
+}
+.footer-copy { color: var(--on-dark-soft); }
+
+/* ── Responsive ── */
+@media (max-width: 860px) {
+  .quiz { padding: 28px 24px; margin-top: -28px; }
+}
+@media (max-width: 600px) {
+  .hero { padding: 72px 20px 110px; }
+  .hero h1 { letter-spacing: -1.5px; }
+  .quiz { padding: 22px 18px; border-radius: 12px; }
+  .quiz-header h2 { font-size: 24px; }
+  .cards { grid-template-columns: 1fr; }
+  .cta-band { padding: 40px 24px; }
+  .cta-band h2 { font-size: 30px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">Ocean Monkeys · Omer Shoval</div>
+    <h1>Find your<br><em>perfect wave</em></h1>
+    <p class="hero-sub">Tell us how you surf and when you can travel. We'll match you to the right clinic from our upcoming trips around the world.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="scrollToQuiz()">Find my clinic →</button>
+      <button class="btn btn-ghost-dark" onclick="showAll()">See all trips</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ── Quiz ── -->
+  <div class="quiz" id="quiz">
+    <div class="quiz-header">
+      <h2>Your perfect clinic in 4 taps</h2>
+      <p>Pick what fits — skip anything you don't mind. Then hit "Find my clinic."</p>
+    </div>
+
+    <div class="q" data-key="level">
+      <div class="qlabel">1 · How would you rate your surfing?</div>
+      <div class="opts">
+        <div class="opt" data-val="beginner"><span class="e">🐣</span>Beginner — learning to stand & catch waves</div>
+        <div class="opt" data-val="intermediate"><span class="e">🌀</span>Intermediate — riding the face, working on turns</div>
+        <div class="opt" data-val="advanced"><span class="e">🔥</span>Advanced — confident on reef & bigger waves</div>
+      </div>
+    </div>
+
+    <div class="q" data-key="wave">
+      <div class="qlabel">2 · What kind of wave gets you stoked?</div>
+      <div class="opts">
+        <div class="opt" data-val="mellow"><span class="e">😌</span>Mellow &amp; cruisy — long, friendly walls</div>
+        <div class="opt" data-val="point"><span class="e">➰</span>Point breaks — long peeling rights</div>
+        <div class="opt" data-val="reef"><span class="e">💎</span>Reef &amp; barrels — power and hollow</div>
+      </div>
+    </div>
+
+    <div class="q" data-key="season">
+      <div class="qlabel">3 · When can you travel?</div>
+      <div class="opts">
+        <div class="opt" data-val="sep"><span class="e">🍂</span>Sep 2026</div>
+        <div class="opt" data-val="oct"><span class="e">🌴</span>Oct 2026</div>
+        <div class="opt" data-val="nov"><span class="e">🌊</span>Nov 2026</div>
+        <div class="opt" data-val="jan"><span class="e">✨</span>Jan 2027</div>
+        <div class="opt" data-val="feb"><span class="e">💙</span>Feb 2027</div>
+      </div>
+    </div>
+
+    <div class="q" data-key="board">
+      <div class="qlabel">4 · What do you ride?</div>
+      <div class="opts">
+        <div class="opt" data-val="longboard"><span class="e">🏄</span>Longboard</div>
+        <div class="opt" data-val="shortboard"><span class="e">🛹</span>Shortboard / performance</div>
+        <div class="opt" data-val="any"><span class="e">🤷</span>Open to anything</div>
+      </div>
+    </div>
+
+    <div class="quiz-actions">
+      <button class="btn btn-primary" onclick="recommend()">Find my clinic →</button>
+      <button class="btn btn-ghost" onclick="showAll()">Just show me everything</button>
+    </div>
+  </div>
+
+  <!-- ── Results ── -->
+  <div class="results" id="results" style="display:none">
+    <div class="results-head">
+      <h2 id="rTitle">Your matches</h2>
+      <p id="rSub"></p>
+    </div>
+    <div class="cards" id="cards"></div>
+  </div>
+
+  <!-- ── CTA band ── -->
+  <div class="cta-band">
+    <h2>Not sure which one?</h2>
+    <p>Tell us your dream trip and Omer will build it around you.</p>
+    <a class="btn btn-primary" href="https://wa.me/972542491388?text=%D7%A9%D7%9C%D7%95%D7%9D%20%D7%A2%D7%95%D7%9E%D7%A8%2C%20%D7%90%D7%A0%D7%99%20%D7%9E%D7%A2%D7%95%D7%A0%D7%99%D7%99%D7%9F%2F%D7%AA%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%95%D7%93%20%D7%A2%D7%9C%20%D7%94%D7%98%D7%99%D7%95%D7%9C%D7%99%D7%9D%20%D7%A9%D7%9C%D7%9A%20%F0%9F%8C%8A%20%D7%90%D7%99%D7%96%D7%94%20%D7%99%D7%A2%D7%93%20%D7%A9%D7%95%D7%A0%D7%94%20%D7%94%D7%9B%D7%99%20%D7%9E%D7%AA%D7%90%D7%99%D7%9D%20%D7%90%D7%9C%D7%99?" target="_blank" rel="noopener">💬 Message Omer on WhatsApp</a>
+  </div>
+
+</div><!-- /wrap -->
+
+<footer>
+  <span class="footer-brand">Ocean Monkeys</span>
+  <div class="footer-copy">© Omer Shoval Surf Clinics · Pro-led clinics around the world</div>
+</footer>
+
+<script>
+/* ============================================================
+   CLINIC DATA
+   ============================================================ */
+const WA = '972542491388';
+const wa = msg => `https://wa.me/${WA}?text=${encodeURIComponent(msg)}`;
+
+const CLINICS = [
+  {
+    id: 'mentawai',
+    name: 'Mentawai Boat Charter',
+    loc: '🇮🇩 Mentawai Islands, Indonesia',
+    dates: 'Sep 1–12, 2026',
+    season: ['sep'],
+    levels: ['intermediate', 'advanced'],
+    waves: ['reef'],
+    boards: ['shortboard', 'any'],
+    desc: "World-class reef passes from a live-aboard boat — Lance's Right, HTs, Rifles. Late-season magic with the lowest crowds of the year. Pure surf, every swell, every day.",
+    tags: ['Boat trip', 'Reef passes', 'Low crowds', 'No wetsuit'],
+    status: 'full',
+    waMsg: 'שלום עומר, אני מעוניין/ת להצטרף לרשימת ההמתנה של טיול גלישה למנטאוואי (1–12 ספטמבר 2026) 🌊 אפשר לספר לי יותר?'
+  },
+  {
+    id: 'phil1',
+    name: 'Siargao — Cloud 9 (Window 1)',
+    loc: '🇵🇭 Siargao, Philippines',
+    dates: 'Oct 3–13, 2026',
+    season: ['oct'],
+    levels: ['beginner', 'intermediate', 'advanced'],
+    waves: ['reef', 'mellow'],
+    boards: ['shortboard', 'longboard', 'any'],
+    desc: "Peak Siargao season. Cloud 9's famous right-hand reef for the chargers, mellow Jacking Horse for those progressing. Best conditions and energy of the month — all levels welcome.",
+    tags: ['All levels', 'Reef + beginner spots', 'Peak season'],
+    status: 'open',
+    waMsg: 'שלום עומר, אני מעוניין/ת לשמוע עוד על טיול גלישה לפיליפינים – חלון ראשון (3–13 אוקטובר 2026) 🏄 תוכל לספר לי יותר?'
+  },
+  {
+    id: 'phil2',
+    name: 'Siargao — Festival Window (Window 2)',
+    loc: '🇵🇭 Siargao, Philippines',
+    dates: 'Oct 17–27, 2026',
+    season: ['oct'],
+    levels: ['intermediate', 'advanced'],
+    waves: ['reef'],
+    boards: ['shortboard', 'any'],
+    desc: "Ride during the Siargao International Surfing Cup energy. Electric atmosphere, alternate breaks away from the contest crowds, and the island in full swing.",
+    tags: ['Contest energy', 'Intermediate+', 'High season'],
+    status: 'open',
+    waMsg: 'שלום עומר, אני מעוניין/ת לשמוע עוד על טיול גלישה לפיליפינים – חלון שני (17–27 אוקטובר 2026) 🏄 תוכל לספר לי יותר?'
+  },
+  {
+    id: 'elsalvador',
+    name: 'El Salvador Pointbreak Camp',
+    loc: '🇸🇻 La Libertad coast, El Salvador',
+    dates: 'Nov 13–23, 2026',
+    season: ['nov'],
+    levels: ['beginner', 'intermediate', 'advanced'],
+    waves: ['point', 'mellow'],
+    boards: ['longboard', 'shortboard', 'any'],
+    desc: "Endless peeling right points on the longest, highest-quality waves in Central America. El Sunzal to cruise and learn, Punta Roca to push your limits. Offshore mornings, 26–28°C water.",
+    tags: ['All levels', 'Point breaks', 'Longboard-friendly', 'Dry season'],
+    status: 'open',
+    waMsg: 'שלום עומר, אני מעוניין/ת לשמוע עוד על טיול גלישה לאל סלבדור (13–23 נובמבר 2026) 🌊 תוכל לספר לי יותר?'
+  },
+  {
+    id: 'mexico',
+    name: 'Saladita Longboard Retreat',
+    loc: '🇲🇽 Saladita, Guerrero, Mexico',
+    dates: 'Jan 5–15, 2027',
+    season: ['jan'],
+    levels: ['beginner', 'intermediate'],
+    waves: ['mellow', 'point'],
+    boards: ['longboard', 'any'],
+    desc: "One of Mexico's premier point breaks — built for longboarding. 10 nights in a modern beachfront villa with a lap pool, chef-cooked meals, daily surf sessions, and evening film screenings.",
+    tags: ['Longboard paradise', 'Beachfront villa', 'Chef meals', '10 nights'],
+    status: 'open',
+    waMsg: 'שלום עומר, אני מעוניין/ת לשמוע עוד על טיול גלישה למקסיקו – סלאדיטה (5–15 ינואר 2027) 🏄 תוכל לספר לי יותר?'
+  },
+  {
+    id: 'srilanka1',
+    name: 'Sri Lanka South Coast (Window 1)',
+    loc: '🇱🇰 Ahangama / Mirissa, Sri Lanka',
+    dates: 'Jan 14–23, 2027',
+    season: ['jan'],
+    levels: ['beginner', 'intermediate'],
+    waves: ['mellow', 'point'],
+    boards: ['longboard', 'shortboard', 'any'],
+    desc: "The friendliest waves we run. Soft beach breaks for first turns, playful point breaks for longboarding, and a special overnight in the Ella highlands — tea plantations, waterfalls, pure magic.",
+    tags: ['Beginner-friendly', 'Longboarding', 'Ella overnight', 'Nature & culture'],
+    status: 'open',
+    waMsg: 'שלום עומר, אני מעוניין/ת לשמוע עוד על טיול גלישה לסרי לנקה – חלון ראשון (14–23 ינואר 2027) 🌊 תוכל לספר לי יותר?'
+  },
+  {
+    id: 'srilanka2',
+    name: 'Sri Lanka South Coast (Window 2)',
+    loc: '🇱🇰 Weligama / Ahangama, Sri Lanka',
+    dates: 'Jan 30 – Feb 8, 2027',
+    season: ['jan', 'feb'],
+    levels: ['beginner', 'intermediate'],
+    waves: ['mellow', 'point'],
+    boards: ['longboard', 'shortboard', 'any'],
+    desc: "Same dreamy south-coast season, second window. Consistent, clean, beginner-to-intermediate paradise with great longboarding points and 27°C tropical waters.",
+    tags: ['Beginner-friendly', 'Peak season', 'Longboarding'],
+    status: 'soon',
+    waMsg: 'שלום עומר, אני מעוניין/ת לשמוע עוד על טיול גלישה לסרי לנקה – חלון שני (30 ינואר – 8 פברואר 2027) 🌊 תוכל לספר לי יותר?'
+  }
+];
+
+const SEASON_LABEL = {
+  sep: 'September 2026', oct: 'October 2026', nov: 'November 2026',
+  jan: 'January 2027', feb: 'February 2027'
+};
+const STATUS_META = {
+  full: ['Waitlist only', 's-full'],
+  open: ['Spots open',   's-open'],
+  soon: ['Opening soon', 's-soon']
+};
+
+/* ── Filter state ── */
+const sel = { level: null, wave: null, season: null, board: null };
+
+document.querySelectorAll('.q').forEach(q => {
+  const key = q.dataset.key;
+  q.querySelectorAll('.opt').forEach(o => {
+    o.onclick = () => {
+      const wasOn = o.classList.contains('sel');
+      q.querySelectorAll('.opt').forEach(x => x.classList.remove('sel'));
+      if (!wasOn) { o.classList.add('sel'); sel[key] = o.dataset.val; }
+      else { sel[key] = null; }
+    };
+  });
+});
+
+/* ── Scoring ── */
+function score(c) {
+  let s = 0, why = [];
+  if (sel.level) {
+    if (c.levels.includes(sel.level)) { s += 3; why.push('matches your level'); }
+    else s -= 2;
+  }
+  if (sel.wave) {
+    if (c.waves.includes(sel.wave)) { s += 3; why.push('your kind of wave'); }
+  }
+  if (sel.season) {
+    if (c.season.includes(sel.season)) { s += 4; why.push('runs in ' + SEASON_LABEL[sel.season]); }
+    else s -= 3;
+  }
+  if (sel.board) {
+    if (sel.board === 'any' || c.boards.includes(sel.board)) {
+      s += 2;
+      if (sel.board === 'longboard' && c.boards.includes('longboard')) why.push('great for longboards');
+    }
+  }
+  return { s, why };
+}
+
+/* ── Card HTML ── */
+function cardHTML({ c, pct, why }) {
+  const [stxt, scls] = STATUS_META[c.status];
+  const badge = pct != null ? `<div class="match-badge">${pct}% match</div>` : '';
+  const whyLine = (why && why.length) ? `<div class="why">✓ ${why.slice(0, 3).join(' · ')}</div>` : '';
+  const isWaitlist = c.status === 'full';
+  const btnLabel = isWaitlist ? 'Join waitlist →' : 'Enquire →';
+  const btnClass = isWaitlist ? 'book-btn waitlist' : 'book-btn';
+  return `<div class="card">
+    <div class="card-head">
+      ${badge}
+      <h3>${c.name}</h3>
+      <div class="loc">${c.loc} · ${c.dates}</div>
+    </div>
+    <div class="card-body">
+      <div class="chips">
+        ${c.tags.map(t => `<span class="chip">${t}</span>`).join('')}
+        <span class="chip level">${c.levels.join(' / ')}</span>
+      </div>
+      <div class="card-desc">${c.desc}</div>
+      ${whyLine}
+    </div>
+    <div class="card-foot">
+      <div>
+        <span class="status-tag ${scls}">${stxt}</span>
+        <div class="price-label">Price on request</div>
+      </div>
+      <a class="${btnClass}" href="${wa(c.waMsg)}" target="_blank" rel="noopener">${btnLabel}</a>
+    </div>
+  </div>`;
+}
+
+/* ── Render ── */
+function render(list, title, sub) {
+  const r = document.getElementById('results');
+  r.style.display = 'block';
+  document.getElementById('rTitle').textContent = title;
+  document.getElementById('rSub').textContent = sub;
+  const wrap = document.getElementById('cards');
+  if (!list.length) {
+    wrap.innerHTML = `<div class="none">No exact match for that combo — but every trip can flex.<br>Message Omer directly and we'll find your wave together.</div>`;
+  } else {
+    wrap.innerHTML = list.map(item => cardHTML(item)).join('');
+  }
+  r.scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ── Actions ── */
+function recommend() {
+  if (!sel.level && !sel.wave && !sel.season && !sel.board) return showAll();
+  const ranked = CLINICS
+    .map(c => { const { s, why } = score(c); return { c, s, why }; })
+    .filter(x => x.s > 0)
+    .sort((a, b) => b.s - a.s);
+  const list = ranked.map(x => ({ c: x.c, why: x.why, pct: Math.min(99, 55 + x.s * 7) }));
+  const filters = [
+    sel.level  && (sel.level + ' level'),
+    sel.wave   && (sel.wave + ' waves'),
+    sel.season && SEASON_LABEL[sel.season],
+    sel.board  && sel.board
+  ].filter(Boolean).join(' · ');
+  render(list, 'Your top matches 🤙', `Ranked for: ${filters}`);
+}
+
+function showAll() {
+  render(
+    CLINICS.map(c => ({ c, pct: null, why: [] })),
+    'All upcoming trips 🌍',
+    'Seven clinics across five countries. Use the quiz above to find your best match.'
+  );
+}
+
+function scrollToQuiz() {
+  document.getElementById('quiz').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
