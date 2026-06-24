@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ── Design tokens (Claude / Anthropic system) ── */
+/* ── Design tokens ── */
 :root {
   --primary:      #cc785c;
   --primary-hov:  #a9583e;
@@ -40,6 +40,45 @@ body {
   color: var(--body);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ── Language Toggle ── */
+.lang-toggle {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(250,249,245,0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--hairline);
+  border-radius: 9999px;
+  padding: 4px;
+  box-shadow: 0 2px 12px rgba(20,20,19,.12), 0 1px 3px rgba(20,20,19,.06);
+  gap: 2px;
+}
+.lang-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  line-height: 1;
+  letter-spacing: 0.3px;
+}
+.lang-btn.active {
+  background: var(--surface-dark);
+  color: var(--on-dark);
+}
+.lang-btn:not(.active):hover {
+  color: var(--ink);
 }
 
 /* ── Typography helpers ── */
@@ -266,6 +305,7 @@ body {
   padding: 3px 11px;
   border-radius: 9999px;
 }
+[dir="rtl"] .match-badge { right: auto; left: 14px; }
 
 .card-body { padding: 20px 24px; flex: 1; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
@@ -408,15 +448,21 @@ footer {
 </head>
 <body>
 
+<!-- ── Language Toggle ── -->
+<div class="lang-toggle">
+  <button class="lang-btn active" id="btnEN" onclick="setLang('en')">EN</button>
+  <button class="lang-btn" id="btnHE" onclick="setLang('he')">עב</button>
+</div>
+
 <!-- ── Hero ── -->
 <div class="hero">
   <div class="hero-inner">
-    <div class="eyebrow">Ocean Monkeys · Omer Shoval</div>
-    <h1>Find your<br><em>perfect wave</em></h1>
-    <p class="hero-sub">Tell us how you surf and when you can travel. We'll match you to the right clinic from our upcoming trips around the world.</p>
+    <div class="eyebrow" id="eyebrow">Ocean Monkeys · Omer Shoval</div>
+    <h1 id="heroH1">Find your<br><em>perfect wave</em></h1>
+    <p class="hero-sub" id="heroSub">Tell us how you surf and when you can travel. We'll match you to the right clinic from our upcoming trips around the world.</p>
     <div class="hero-actions">
-      <button class="btn btn-primary" onclick="scrollToQuiz()">Find my clinic →</button>
-      <button class="btn btn-ghost-dark" onclick="showAll()">See all trips</button>
+      <button class="btn btn-primary" id="btnFindClinic" onclick="scrollToQuiz()">Find my clinic →</button>
+      <button class="btn btn-ghost-dark" id="btnSeeAll" onclick="showAll()">See all trips</button>
     </div>
   </div>
 </div>
@@ -426,51 +472,51 @@ footer {
   <!-- ── Quiz ── -->
   <div class="quiz" id="quiz">
     <div class="quiz-header">
-      <h2>Your perfect clinic in 4 taps</h2>
-      <p>Pick what fits — skip anything you don't mind. Then hit "Find my clinic."</p>
+      <h2 id="quizTitle">Your perfect clinic in 4 taps</h2>
+      <p id="quizSub">Pick what fits — skip anything you don't mind. Then hit "Find my clinic."</p>
     </div>
 
     <div class="q" data-key="level">
-      <div class="qlabel">1 · How would you rate your surfing?</div>
+      <div class="qlabel" id="q1Label">1 · How would you rate your surfing?</div>
       <div class="opts">
-        <div class="opt" data-val="beginner"><span class="e">🐣</span>Beginner — learning to stand & catch waves</div>
-        <div class="opt" data-val="intermediate"><span class="e">🌀</span>Intermediate — riding the face, working on turns</div>
-        <div class="opt" data-val="advanced"><span class="e">🔥</span>Advanced — confident on reef & bigger waves</div>
+        <div class="opt" data-val="beginner"><span class="e">🐣</span><span id="oBeginner">Beginner — learning to stand &amp; catch waves</span></div>
+        <div class="opt" data-val="intermediate"><span class="e">🌀</span><span id="oIntermediate">Intermediate — riding the face, working on turns</span></div>
+        <div class="opt" data-val="advanced"><span class="e">🔥</span><span id="oAdvanced">Advanced — confident on reef &amp; bigger waves</span></div>
       </div>
     </div>
 
     <div class="q" data-key="wave">
-      <div class="qlabel">2 · What kind of wave gets you stoked?</div>
+      <div class="qlabel" id="q2Label">2 · What kind of wave gets you stoked?</div>
       <div class="opts">
-        <div class="opt" data-val="mellow"><span class="e">😌</span>Mellow &amp; cruisy — long, friendly walls</div>
-        <div class="opt" data-val="point"><span class="e">➰</span>Point breaks — long peeling rights</div>
-        <div class="opt" data-val="reef"><span class="e">💎</span>Reef &amp; barrels — power and hollow</div>
+        <div class="opt" data-val="mellow"><span class="e">😌</span><span id="oMellow">Mellow &amp; cruisy — long, friendly walls</span></div>
+        <div class="opt" data-val="point"><span class="e">➰</span><span id="oPoint">Point breaks — long peeling rights</span></div>
+        <div class="opt" data-val="reef"><span class="e">💎</span><span id="oReef">Reef &amp; barrels — power and hollow</span></div>
       </div>
     </div>
 
     <div class="q" data-key="season">
-      <div class="qlabel">3 · When can you travel?</div>
+      <div class="qlabel" id="q3Label">3 · When can you travel?</div>
       <div class="opts">
-        <div class="opt" data-val="sep"><span class="e">🍂</span>Sep 2026</div>
-        <div class="opt" data-val="oct"><span class="e">🌴</span>Oct 2026</div>
-        <div class="opt" data-val="nov"><span class="e">🌊</span>Nov 2026</div>
-        <div class="opt" data-val="jan"><span class="e">✨</span>Jan 2027</div>
-        <div class="opt" data-val="feb"><span class="e">💙</span>Feb 2027</div>
+        <div class="opt" data-val="sep"><span class="e">🍂</span><span id="oSep">Sep 2026</span></div>
+        <div class="opt" data-val="oct"><span class="e">🌴</span><span id="oOct">Oct 2026</span></div>
+        <div class="opt" data-val="nov"><span class="e">🌊</span><span id="oNov">Nov 2026</span></div>
+        <div class="opt" data-val="jan"><span class="e">✨</span><span id="oJan">Jan 2027</span></div>
+        <div class="opt" data-val="feb"><span class="e">💙</span><span id="oFeb">Feb 2027</span></div>
       </div>
     </div>
 
     <div class="q" data-key="board">
-      <div class="qlabel">4 · What do you ride?</div>
+      <div class="qlabel" id="q4Label">4 · What do you ride?</div>
       <div class="opts">
-        <div class="opt" data-val="longboard"><span class="e">🏄</span>Longboard</div>
-        <div class="opt" data-val="shortboard"><span class="e">🛹</span>Shortboard / performance</div>
-        <div class="opt" data-val="any"><span class="e">🤷</span>Open to anything</div>
+        <div class="opt" data-val="longboard"><span class="e">🏄</span><span id="oLongboard">Longboard</span></div>
+        <div class="opt" data-val="shortboard"><span class="e">🛹</span><span id="oShortboard">Shortboard / performance</span></div>
+        <div class="opt" data-val="any"><span class="e">🤷</span><span id="oAny">Open to anything</span></div>
       </div>
     </div>
 
     <div class="quiz-actions">
-      <button class="btn btn-primary" onclick="recommend()">Find my clinic →</button>
-      <button class="btn btn-ghost" onclick="showAll()">Just show me everything</button>
+      <button class="btn btn-primary" id="btnRecommend" onclick="recommend()">Find my clinic →</button>
+      <button class="btn btn-ghost" id="btnShowAll" onclick="showAll()">Just show me everything</button>
     </div>
   </div>
 
@@ -485,19 +531,167 @@ footer {
 
   <!-- ── CTA band ── -->
   <div class="cta-band">
-    <h2>Not sure which one?</h2>
-    <p>Tell us your dream trip and Omer will build it around you.</p>
-    <a class="btn btn-primary" href="https://wa.me/972542491388?text=%D7%A9%D7%9C%D7%95%D7%9D%20%D7%A2%D7%95%D7%9E%D7%A8%2C%20%D7%90%D7%A0%D7%99%20%D7%9E%D7%A2%D7%95%D7%A0%D7%99%D7%99%D7%9F%2F%D7%AA%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%95%D7%93%20%D7%A2%D7%9C%20%D7%94%D7%98%D7%99%D7%95%D7%9C%D7%99%D7%9D%20%D7%A9%D7%9C%D7%9A%20%F0%9F%8C%8A%20%D7%90%D7%99%D7%96%D7%94%20%D7%99%D7%A2%D7%93%20%D7%A9%D7%95%D7%A0%D7%94%20%D7%94%D7%9B%D7%99%20%D7%9E%D7%AA%D7%90%D7%99%D7%9D%20%D7%90%D7%9C%D7%99?" target="_blank" rel="noopener">💬 Message Omer on WhatsApp</a>
+    <h2 id="ctaTitle">Not sure which one?</h2>
+    <p id="ctaSub">Tell us your dream trip and Omer will build it around you.</p>
+    <a class="btn btn-primary" id="ctaBtn" href="https://wa.me/972542491388?text=%D7%A9%D7%9C%D7%95%D7%9D%20%D7%A2%D7%95%D7%9E%D7%A8%2C%20%D7%90%D7%A0%D7%99%20%D7%9E%D7%A2%D7%95%D7%A0%D7%99%D7%99%D7%9F%2F%D7%AA%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%95%D7%93%20%D7%A2%D7%9C%20%D7%94%D7%98%D7%99%D7%95%D7%9C%D7%99%D7%9D%20%D7%A9%D7%9C%D7%9A%20%F0%9F%8C%8A%20%D7%90%D7%99%D7%96%D7%94%20%D7%99%D7%A2%D7%93%20%D7%A9%D7%95%D7%A0%D7%94%20%D7%94%D7%9B%D7%99%20%D7%9E%D7%AA%D7%90%D7%99%D7%9D%20%D7%90%D7%9C%D7%99?" target="_blank" rel="noopener">💬 Message Omer on WhatsApp</a>
   </div>
 
 </div><!-- /wrap -->
 
 <footer>
   <span class="footer-brand">Ocean Monkeys</span>
-  <div class="footer-copy">© Omer Shoval Surf Clinics · Pro-led clinics around the world</div>
+  <div class="footer-copy" id="footerCopy">© Omer Shoval Surf Clinics · Pro-led clinics around the world</div>
 </footer>
 
 <script>
+/* ============================================================
+   TRANSLATIONS
+   ============================================================ */
+let lang = 'en';
+
+const T = {
+  en: {
+    eyebrow:       'Ocean Monkeys · Omer Shoval',
+    heroH1:        'Find your<br><em>perfect wave</em>',
+    heroSub:       "Tell us how you surf and when you can travel. We'll match you to the right clinic from our upcoming trips around the world.",
+    btnFindClinic: 'Find my clinic →',
+    btnSeeAll:     'See all trips',
+    quizTitle:     'Your perfect clinic in 4 taps',
+    quizSub:       'Pick what fits — skip anything you don\'t mind. Then hit "Find my clinic."',
+    q1Label:       '1 · How would you rate your surfing?',
+    q2Label:       '2 · What kind of wave gets you stoked?',
+    q3Label:       '3 · When can you travel?',
+    q4Label:       '4 · What do you ride?',
+    oBeginner:     'Beginner — learning to stand & catch waves',
+    oIntermediate: 'Intermediate — riding the face, working on turns',
+    oAdvanced:     'Advanced — confident on reef & bigger waves',
+    oMellow:       'Mellow & cruisy — long, friendly walls',
+    oPoint:        'Point breaks — long peeling rights',
+    oReef:         'Reef & barrels — power and hollow',
+    oSep: 'Sep 2026', oOct: 'Oct 2026', oNov: 'Nov 2026', oJan: 'Jan 2027', oFeb: 'Feb 2027',
+    oLongboard:    'Longboard',
+    oShortboard:   'Shortboard / performance',
+    oAny:          'Open to anything',
+    btnRecommend:  'Find my clinic →',
+    btnShowAll:    'Just show me everything',
+    ctaTitle:      'Not sure which one?',
+    ctaSub:        'Tell us your dream trip and Omer will build it around you.',
+    ctaBtn:        '💬 Message Omer on WhatsApp',
+    footerCopy:    '© Omer Shoval Surf Clinics · Pro-led clinics around the world',
+    rTitleMatch:   'Your top matches 🤙',
+    rSubMatch:     'Ranked for:',
+    rTitleAll:     'All upcoming trips 🌍',
+    rSubAll:       'Seven clinics across five countries. Use the quiz above to find your best match.',
+    noMatch:       "No exact match for that combo — but every trip can flex.<br>Message Omer directly and we'll find your wave together.",
+    priceLabel:    'Price on request',
+    enquireBtn:    'Enquire →',
+    waitlistBtn:   'Join waitlist →',
+    statusFull:    'Waitlist only',
+    statusOpen:    'Spots open',
+    statusSoon:    'Opening soon',
+    whyLevel:      'matches your level',
+    whyWave:       'your kind of wave',
+    whySeason:     s => 'runs in ' + s,
+    whyLongboard:  'great for longboards',
+    levelLabel:    { beginner: 'beginner', intermediate: 'intermediate', advanced: 'advanced' },
+    seasonLabel:   { sep: 'September 2026', oct: 'October 2026', nov: 'November 2026', jan: 'January 2027', feb: 'February 2027' },
+    tags: {
+      'Boat trip': 'Boat trip', 'Reef passes': 'Reef passes', 'Low crowds': 'Low crowds',
+      'No wetsuit': 'No wetsuit', 'All levels': 'All levels', 'Reef + beginner spots': 'Reef + beginner spots',
+      'Peak season': 'Peak season', 'Contest energy': 'Contest energy', 'Intermediate+': 'Intermediate+',
+      'High season': 'High season', 'Point breaks': 'Point breaks', 'Longboard-friendly': 'Longboard-friendly',
+      'Dry season': 'Dry season', 'Longboard paradise': 'Longboard paradise', 'Beachfront villa': 'Beachfront villa',
+      'Chef meals': 'Chef meals', '10 nights': '10 nights', 'Beginner-friendly': 'Beginner-friendly',
+      'Longboarding': 'Longboarding', 'Ella overnight': 'Ella overnight', 'Nature & culture': 'Nature & culture',
+    }
+  },
+  he: {
+    eyebrow:       'Ocean Monkeys · עומר שובל',
+    heroH1:        'מצאו את<br><em>הגל המושלם</em>',
+    heroSub:       'ספרו לנו איך אתם גולשים ומתי אתם יכולים לנסוע. נמצא לכם את הקליניקה המתאימה מבין הטיולים הקרובים שלנו ברחבי העולם.',
+    btnFindClinic: '← מצאו לי קליניקה',
+    btnSeeAll:     'כל הטיולים',
+    quizTitle:     'הקליניקה המושלמת ב-4 לחיצות',
+    quizSub:       'בחרו מה מתאים לכם — דלגו על מה שלא חשוב. אחר כך לחצו על "מצאו לי קליניקה".',
+    q1Label:       '1 · איך הייתם מדרגים את הגלישה שלכם?',
+    q2Label:       '2 · איזה סוג גל מדליק אתכם?',
+    q3Label:       '3 · מתי אתם יכולים לנסוע?',
+    q4Label:       '4 · על מה אתם גולשים?',
+    oBeginner:     'מתחיל/ה — לומדים לעמוד ולתפוס גלים',
+    oIntermediate: 'בינוני/ת — גולשים על הפנים, עובדים על פניות',
+    oAdvanced:     'מתקדם/ת — בטוחים על שוניות וגלים גדולים',
+    oMellow:       'מתון ונינוח — קירות ארוכים וידידותיים',
+    oPoint:        'פוינט ברייק — ימין ארוך ומתגלגל',
+    oReef:         'שוניות וברלים — עוצמה וחלוליות',
+    oSep: 'ספטמבר 2026', oOct: 'אוקטובר 2026', oNov: 'נובמבר 2026', oJan: 'ינואר 2027', oFeb: 'פברואר 2027',
+    oLongboard:    'לונגבורד',
+    oShortboard:   'שורטבורד / פרפורמנס',
+    oAny:          'פתוח/ה לכל',
+    btnRecommend:  '← מצאו לי קליניקה',
+    btnShowAll:    'פשוט תראו לי הכל',
+    ctaTitle:      'לא בטוחים?',
+    ctaSub:        'ספרו לנו על טיול החלומות שלכם ועומר יבנה אותו סביבכם.',
+    ctaBtn:        '💬 כתבו לעומר בוואטסאפ',
+    footerCopy:    '© קליניקות גלישה — עומר שובל · קליניקות בהנחיית פרו ברחבי העולם',
+    rTitleMatch:   'ההתאמות הטובות ביותר 🤙',
+    rSubMatch:     'ממוין לפי:',
+    rTitleAll:     'כל הטיולים הקרובים 🌍',
+    rSubAll:       'שבע קליניקות בחמש מדינות. השתמשו בשאלון כדי למצוא את ההתאמה הטובה ביותר.',
+    noMatch:       'אין התאמה מדויקת לקומבינציה הזו — אבל כל טיול יכול להיות גמיש.<br>שלחו לעומר הודעה ישירה ונמצא את הגל שלכם ביחד.',
+    priceLabel:    'מחיר על פי בקשה',
+    enquireBtn:    '← לפרטים',
+    waitlistBtn:   '← רשימת המתנה',
+    statusFull:    'רשימת המתנה בלבד',
+    statusOpen:    'מקומות פנויים',
+    statusSoon:    'נפתח בקרוב',
+    whyLevel:      'מתאים לרמה שלכם',
+    whyWave:       'הגל שלכם',
+    whySeason:     s => 'מתקיים ב-' + s,
+    whyLongboard:  'מצוין ללונגבורד',
+    levelLabel:    { beginner: 'מתחיל/ה', intermediate: 'בינוני/ת', advanced: 'מתקדם/ת' },
+    seasonLabel:   { sep: 'ספטמבר 2026', oct: 'אוקטובר 2026', nov: 'נובמבר 2026', jan: 'ינואר 2027', feb: 'פברואר 2027' },
+    tags: {
+      'Boat trip': 'טיול בסירה', 'Reef passes': 'מעברי שוניות', 'Low crowds': 'פחות גודש',
+      'No wetsuit': 'ללא חליפה', 'All levels': 'כל הרמות', 'Reef + beginner spots': 'שוניות + נקודות למתחילים',
+      'Peak season': 'שיא העונה', 'Contest energy': 'אנרגיית תחרות', 'Intermediate+': 'בינוני ומעלה',
+      'High season': 'עונה גבוהה', 'Point breaks': 'פוינט ברייקים', 'Longboard-friendly': 'ידידותי ללונגבורד',
+      'Dry season': 'עונת הצייה', 'Longboard paradise': 'גן עדן ללונגבורד', 'Beachfront villa': 'וילה חופית',
+      'Chef meals': 'ארוחות שף', '10 nights': '10 לילות', 'Beginner-friendly': 'ידידותי למתחילים',
+      'Longboarding': 'לונגבורדינג', 'Ella overnight': 'לילה באלה', 'Nature & culture': 'טבע ותרבות',
+    }
+  }
+};
+
+function setLang(l) {
+  lang = l;
+  document.documentElement.lang = l;
+  document.documentElement.dir  = l === 'he' ? 'rtl' : 'ltr';
+  document.getElementById('btnEN').classList.toggle('active', l === 'en');
+  document.getElementById('btnHE').classList.toggle('active', l === 'he');
+
+  const t = T[l];
+  const ids = ['eyebrow','heroH1','heroSub','btnFindClinic','btnSeeAll','quizTitle','quizSub',
+    'q1Label','q2Label','q3Label','q4Label',
+    'oBeginner','oIntermediate','oAdvanced','oMellow','oPoint','oReef',
+    'oSep','oOct','oNov','oJan','oFeb','oLongboard','oShortboard','oAny',
+    'btnRecommend','btnShowAll','ctaTitle','ctaSub','ctaBtn','footerCopy'];
+
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && t[id] !== undefined) el.innerHTML = t[id];
+  });
+
+  // Re-render results if visible
+  if (document.getElementById('results').style.display !== 'none') {
+    const title = document.getElementById('rTitle').textContent;
+    if (title.includes('match') || title.includes('התאמ')) {
+      recommend();
+    } else {
+      showAll();
+    }
+  }
+}
+
 /* ============================================================
    CLINIC DATA
    ============================================================ */
@@ -515,6 +709,7 @@ const CLINICS = [
     waves: ['reef'],
     boards: ['shortboard', 'any'],
     desc: "World-class reef passes from a live-aboard boat — Lance's Right, HTs, Rifles. Late-season magic with the lowest crowds of the year. Pure surf, every swell, every day.",
+    descHe: "מעברי שוניות ברמה עולמית מסירת לייב-אבורד — Lance's Right, HTs, Rifles. קסם של סוף עונה עם הצפיפות הנמוכה ביותר בשנה. גלישה טהורה, כל גל, כל יום.",
     tags: ['Boat trip', 'Reef passes', 'Low crowds', 'No wetsuit'],
     status: 'full',
     waMsg: 'שלום עומר, אני מעוניין/ת להצטרף לרשימת ההמתנה של טיול גלישה למנטאוואי (1–12 ספטמבר 2026) 🌊 אפשר לספר לי יותר?'
@@ -529,6 +724,7 @@ const CLINICS = [
     waves: ['reef', 'mellow'],
     boards: ['shortboard', 'longboard', 'any'],
     desc: "Peak Siargao season. Cloud 9's famous right-hand reef for the chargers, mellow Jacking Horse for those progressing. Best conditions and energy of the month — all levels welcome.",
+    descHe: "שיא עונת סיארגאו. שוניות ימין המפורסמות של Cloud 9 למי שאוהב עוצמה, ג'קינג הורס המתון לאלו בשלב ההתקדמות. התנאים והאנרגיה הטובים של החודש — כל הרמות מוזמנות.",
     tags: ['All levels', 'Reef + beginner spots', 'Peak season'],
     status: 'open',
     waMsg: 'שלום עומר, אני מעוניין/ת לשמוע עוד על טיול גלישה לפיליפינים – חלון ראשון (3–13 אוקטובר 2026) 🏄 תוכל לספר לי יותר?'
@@ -543,6 +739,7 @@ const CLINICS = [
     waves: ['reef'],
     boards: ['shortboard', 'any'],
     desc: "Ride during the Siargao International Surfing Cup energy. Electric atmosphere, alternate breaks away from the contest crowds, and the island in full swing.",
+    descHe: "גלשו בתוך האנרגיה של גביע הגלישה הבינלאומי של סיארגאו. אווירה חשמלית, מקומות אלטרנטיביים רחוק מהמוני התחרות, והאי בפיצוץ מלא.",
     tags: ['Contest energy', 'Intermediate+', 'High season'],
     status: 'open',
     waMsg: 'שלום עומר, אני מעוניין/ת לשמוע עוד על טיול גלישה לפיליפינים – חלון שני (17–27 אוקטובר 2026) 🏄 תוכל לספר לי יותר?'
@@ -557,6 +754,7 @@ const CLINICS = [
     waves: ['point', 'mellow'],
     boards: ['longboard', 'shortboard', 'any'],
     desc: "Endless peeling right points on the longest, highest-quality waves in Central America. El Sunzal to cruise and learn, Punta Roca to push your limits. Offshore mornings, 26–28°C water.",
+    descHe: "נקודות ימין ארוכות ואינסופיות על הגלים הארוכים והאיכותיים ביותר במרכז אמריקה. אל סונזל לשיוט ולמידה, פונטה רוקה לדחוף את הגבולות. בוקרים עם רוח אופשור, מים 26–28°C.",
     tags: ['All levels', 'Point breaks', 'Longboard-friendly', 'Dry season'],
     status: 'open',
     waMsg: 'שלום עומר, אני מעוניין/ת לשמוע עוד על טיול גלישה לאל סלבדור (13–23 נובמבר 2026) 🌊 תוכל לספר לי יותר?'
@@ -571,6 +769,7 @@ const CLINICS = [
     waves: ['mellow', 'point'],
     boards: ['longboard', 'any'],
     desc: "One of Mexico's premier point breaks — built for longboarding. 10 nights in a modern beachfront villa with a lap pool, chef-cooked meals, daily surf sessions, and evening film screenings.",
+    descHe: "אחד מנקודות הגלישה המובחרות של מקסיקו — בנוי ללונגבורדינג. 10 לילות בווילה חופית מודרנית עם בריכה, ארוחות שף, אימוני גלישה יומיים וסרטים בערב.",
     tags: ['Longboard paradise', 'Beachfront villa', 'Chef meals', '10 nights'],
     status: 'open',
     waMsg: 'שלום עומר, אני מעוניין/ת לשמוע עוד על טיול גלישה למקסיקו – סלאדיטה (5–15 ינואר 2027) 🏄 תוכל לספר לי יותר?'
@@ -585,6 +784,7 @@ const CLINICS = [
     waves: ['mellow', 'point'],
     boards: ['longboard', 'shortboard', 'any'],
     desc: "The friendliest waves we run. Soft beach breaks for first turns, playful point breaks for longboarding, and a special overnight in the Ella highlands — tea plantations, waterfalls, pure magic.",
+    descHe: "הגלים הידידותיים ביותר שאנחנו מריצים. שבירות חוף רכות לפניות ראשונות, נקודות שובבות ללונגבורדינג, ולילה מיוחד בהרי אלה — מטעי תה, מפלים, קסם טהור.",
     tags: ['Beginner-friendly', 'Longboarding', 'Ella overnight', 'Nature & culture'],
     status: 'open',
     waMsg: 'שלום עומר, אני מעוניין/ת לשמוע עוד על טיול גלישה לסרי לנקה – חלון ראשון (14–23 ינואר 2027) 🌊 תוכל לספר לי יותר?'
@@ -599,21 +799,12 @@ const CLINICS = [
     waves: ['mellow', 'point'],
     boards: ['longboard', 'shortboard', 'any'],
     desc: "Same dreamy south-coast season, second window. Consistent, clean, beginner-to-intermediate paradise with great longboarding points and 27°C tropical waters.",
+    descHe: "אותה עונה חלומית של החוף הדרומי, חלון שני. עקבי, נקי, גן עדן למתחילים-בינוניים עם נקודות לונגבורד מצוינות ומים טרופיים של 27°C.",
     tags: ['Beginner-friendly', 'Peak season', 'Longboarding'],
     status: 'soon',
     waMsg: 'שלום עומר, אני מעוניין/ת לשמוע עוד על טיול גלישה לסרי לנקה – חלון שני (30 ינואר – 8 פברואר 2027) 🌊 תוכל לספר לי יותר?'
   }
 ];
-
-const SEASON_LABEL = {
-  sep: 'September 2026', oct: 'October 2026', nov: 'November 2026',
-  jan: 'January 2027', feb: 'February 2027'
-};
-const STATUS_META = {
-  full: ['Waitlist only', 's-full'],
-  open: ['Spots open',   's-open'],
-  soon: ['Opening soon', 's-soon']
-};
 
 /* ── Filter state ── */
 const sel = { level: null, wave: null, season: null, board: null };
@@ -632,22 +823,23 @@ document.querySelectorAll('.q').forEach(q => {
 
 /* ── Scoring ── */
 function score(c) {
+  const t = T[lang];
   let s = 0, why = [];
   if (sel.level) {
-    if (c.levels.includes(sel.level)) { s += 3; why.push('matches your level'); }
+    if (c.levels.includes(sel.level)) { s += 3; why.push(t.whyLevel); }
     else s -= 2;
   }
   if (sel.wave) {
-    if (c.waves.includes(sel.wave)) { s += 3; why.push('your kind of wave'); }
+    if (c.waves.includes(sel.wave)) { s += 3; why.push(t.whyWave); }
   }
   if (sel.season) {
-    if (c.season.includes(sel.season)) { s += 4; why.push('runs in ' + SEASON_LABEL[sel.season]); }
+    if (c.season.includes(sel.season)) { s += 4; why.push(t.whySeason(t.seasonLabel[sel.season])); }
     else s -= 3;
   }
   if (sel.board) {
     if (sel.board === 'any' || c.boards.includes(sel.board)) {
       s += 2;
-      if (sel.board === 'longboard' && c.boards.includes('longboard')) why.push('great for longboards');
+      if (sel.board === 'longboard' && c.boards.includes('longboard')) why.push(t.whyLongboard);
     }
   }
   return { s, why };
@@ -655,12 +847,17 @@ function score(c) {
 
 /* ── Card HTML ── */
 function cardHTML({ c, pct, why }) {
-  const [stxt, scls] = STATUS_META[c.status];
-  const badge = pct != null ? `<div class="match-badge">${pct}% match</div>` : '';
+  const t = T[lang];
+  const stxt = c.status === 'full' ? t.statusFull : c.status === 'open' ? t.statusOpen : t.statusSoon;
+  const scls = { full: 's-full', open: 's-open', soon: 's-soon' }[c.status];
+  const badge = pct != null ? `<div class="match-badge">${pct}%</div>` : '';
   const whyLine = (why && why.length) ? `<div class="why">✓ ${why.slice(0, 3).join(' · ')}</div>` : '';
   const isWaitlist = c.status === 'full';
-  const btnLabel = isWaitlist ? 'Join waitlist →' : 'Enquire →';
+  const btnLabel = isWaitlist ? t.waitlistBtn : t.enquireBtn;
   const btnClass = isWaitlist ? 'book-btn waitlist' : 'book-btn';
+  const desc = lang === 'he' ? c.descHe : c.desc;
+  const tagList = c.tags.map(tag => `<span class="chip">${t.tags[tag] || tag}</span>`).join('');
+  const levelChips = c.levels.map(lv => `<span class="chip level">${t.levelLabel[lv] || lv}</span>`).join('');
   return `<div class="card">
     <div class="card-head">
       ${badge}
@@ -668,17 +865,14 @@ function cardHTML({ c, pct, why }) {
       <div class="loc">${c.loc} · ${c.dates}</div>
     </div>
     <div class="card-body">
-      <div class="chips">
-        ${c.tags.map(t => `<span class="chip">${t}</span>`).join('')}
-        <span class="chip level">${c.levels.join(' / ')}</span>
-      </div>
-      <div class="card-desc">${c.desc}</div>
+      <div class="chips">${tagList}${levelChips}</div>
+      <div class="card-desc">${desc}</div>
       ${whyLine}
     </div>
     <div class="card-foot">
       <div>
         <span class="status-tag ${scls}">${stxt}</span>
-        <div class="price-label">Price on request</div>
+        <div class="price-label">${t.priceLabel}</div>
       </div>
       <a class="${btnClass}" href="${wa(c.waMsg)}" target="_blank" rel="noopener">${btnLabel}</a>
     </div>
@@ -693,7 +887,7 @@ function render(list, title, sub) {
   document.getElementById('rSub').textContent = sub;
   const wrap = document.getElementById('cards');
   if (!list.length) {
-    wrap.innerHTML = `<div class="none">No exact match for that combo — but every trip can flex.<br>Message Omer directly and we'll find your wave together.</div>`;
+    wrap.innerHTML = `<div class="none">${T[lang].noMatch}</div>`;
   } else {
     wrap.innerHTML = list.map(item => cardHTML(item)).join('');
   }
@@ -702,6 +896,7 @@ function render(list, title, sub) {
 
 /* ── Actions ── */
 function recommend() {
+  const t = T[lang];
   if (!sel.level && !sel.wave && !sel.season && !sel.board) return showAll();
   const ranked = CLINICS
     .map(c => { const { s, why } = score(c); return { c, s, why }; })
@@ -709,19 +904,20 @@ function recommend() {
     .sort((a, b) => b.s - a.s);
   const list = ranked.map(x => ({ c: x.c, why: x.why, pct: Math.min(99, 55 + x.s * 7) }));
   const filters = [
-    sel.level  && (sel.level + ' level'),
-    sel.wave   && (sel.wave + ' waves'),
-    sel.season && SEASON_LABEL[sel.season],
-    sel.board  && sel.board
+    sel.level  && t.levelLabel[sel.level],
+    sel.wave   && sel.wave,
+    sel.season && t.seasonLabel[sel.season],
+    sel.board  && t.levelLabel[sel.board]
   ].filter(Boolean).join(' · ');
-  render(list, 'Your top matches 🤙', `Ranked for: ${filters}`);
+  render(list, t.rTitleMatch, `${t.rSubMatch} ${filters}`);
 }
 
 function showAll() {
+  const t = T[lang];
   render(
     CLINICS.map(c => ({ c, pct: null, why: [] })),
-    'All upcoming trips 🌍',
-    'Seven clinics across five countries. Use the quiz above to find your best match.'
+    t.rTitleAll,
+    t.rSubAll
   );
 }
 

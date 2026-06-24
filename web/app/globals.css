@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  /* ── Palette ── */
+  --canvas:       #f9f8f4;
+  --canvas-soft:  #f0ede6;
+  --surface:      #ffffff;
+
+  --ink:          #0a0a09;
+  --ink-2:        #2e2e2b;
+  --ink-muted:    #6c6c65;
+  --ink-faint:    rgba(10,10,9,0.25);
+
+  --line:         #e4e2da;
+  --line-soft:    #eceae3;
+
+  --coral:        #cc785c;
+  --coral-hover:  #a9583e;
+
+  /* status */
+  --open-bg:  #e6f4ee;  --open-fg:  #1a7a45;
+  --full-bg:  #fdecea;  --full-fg:  #b93224;
+  --soon-bg:  #f0eeea;  --soon-fg:  #6c6c65;
+
+  /* ── Safe area helpers ── */
+  --sat: env(safe-area-inset-top,    0px);
+  --sar: env(safe-area-inset-right,  0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left,   0px);
+
+  /* Nav height + safe area bottom */
+  --nav-h:   72px;
+  --nav-pad: calc(var(--nav-h) + var(--sab) + 8px);
+
+  /* Top padding that clears the status bar */
+  --top-safe: calc(var(--sat) + 12px);
+}
+
+@theme inline {
+  --font-heebo: var(--font-heebo);
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+  /* stop double-tap zoom */
+  touch-action: manipulation;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-heebo), "Heebo", system-ui, sans-serif;
+  min-height: 100%;
+  /* block pull-to-refresh */
+  overscroll-behavior: none;
+}
+
+/* ── Momentum scroll for scrollable containers ── */
+.scroll-y {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+.scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+/* ── Hide scrollbar everywhere ── */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar { display: none; }
+
+/* ── Tap highlight gone ── */
+* { -webkit-tap-highlight-color: transparent; }
+
+/* ── Utilities ── */
+.safe-top    { padding-top:    var(--sat); }
+.safe-bottom { padding-bottom: var(--sab); }
