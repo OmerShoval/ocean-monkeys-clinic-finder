@@ -3,8 +3,9 @@
 import { motion, useAnimationFrame, AnimatePresence } from "motion/react";
 import { useRef, useState } from "react";
 import { CLINICS, wa, type Clinic } from "@/lib/clinics";
+import { useLang } from "@/lib/lang-context";
 
-/* ── Drift configs: keep cards within the middle of the screen ── */
+/* ── Drift configs ── */
 const DRIFT = [
   { x: 5,  y: 12, rot: -6,  dx: 14, dy: 10, spd: 0.00038 },
   { x: 52, y: 8,  rot:  5,  dx: 10, dy: 14, spd: 0.00032 },
@@ -15,7 +16,6 @@ const DRIFT = [
   { x: 34, y: 56, rot: -5,  dx: 18, dy:  7, spd: 0.00046 },
 ] as const;
 
-/* ── Card widths cycle: larger on first, smaller thereafter ── */
 const CARD_W = [160, 140, 130, 160, 145, 135, 150];
 
 function FloatingCard({
@@ -27,6 +27,7 @@ function FloatingCard({
   index: number;
   onClick: (c: Clinic) => void;
 }) {
+  const { lang } = useLang();
   const t = useRef(index * 900);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
 
@@ -37,7 +38,9 @@ function FloatingCard({
   });
 
   const STATUS_COLOR: Record<string, string> = { open: "#10b870", full: "#e05050", soon: "#aaa" };
-  const STATUS_LABEL: Record<string, string> = { open: "פנוי", full: "מלא", soon: "בקרוב" };
+  const STATUS_LABEL: Record<string, string> = lang === "he"
+    ? { open: "פנוי", full: "מלא", soon: "בקרוב" }
+    : { open: "Open", full: "Full", soon: "Soon" };
 
   return (
     <motion.button
@@ -53,31 +56,23 @@ function FloatingCard({
       whileTap={{ scale: 0.95 }}
       onClick={() => onClick(clinic)}
       className="absolute cursor-pointer border-0 bg-transparent p-0"
-      style={{
-        left:     `${drift.x}%`,
-        top:      `${drift.y}%`,
-        rotate:   `${drift.rot}deg`,
-        width:    w,
-        zIndex:   12 - index,
-      }}
+      style={{ left: `${drift.x}%`, top: `${drift.y}%`, rotate: `${drift.rot}deg`, width: w, zIndex: 12 - index }}
     >
       <div
         className="relative overflow-hidden w-full"
         style={{
-          background:   clinic.gradient,
+          background:   "#111",
           borderRadius: 22,
           aspectRatio:  "3 / 4",
           boxShadow:    "0 16px 48px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.16)",
         }}
       >
-        {/* Photo blend */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={clinic.image}
           alt=""
           aria-hidden
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: 0.35, mixBlendMode: "overlay" }}
         />
 
         {/* Status pill */}
@@ -98,14 +93,11 @@ function FloatingCard({
           className="absolute inset-x-0 bottom-0 p-3"
           style={{ background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)" }}
         >
-          <div
-            className="text-white font-black text-[11px] leading-snug"
-            style={{ fontFamily: "var(--font-heebo)" }}
-          >
-            {clinic.flag} {clinic.nameHe}
+          <div className="text-white font-black text-[11px] leading-snug" style={{ fontFamily: "var(--font-heebo)" }}>
+            {clinic.flag} {lang === "he" ? clinic.nameHe : clinic.name}
           </div>
           <div className="text-white/65 text-[9px] mt-0.5 font-medium">
-            {clinic.datesHe}
+            {lang === "he" ? clinic.datesHe : clinic.dates}
           </div>
         </div>
       </div>
@@ -115,9 +107,12 @@ function FloatingCard({
 
 /* ── Full-screen bottom sheet ── */
 function DetailSheet({ clinic, onClose }: { clinic: Clinic; onClose: () => void }) {
-  const S_LABEL: Record<string, string> = { open: "מקומות פנויים", full: "מלא — רשימת המתנה", soon: "נפתח בקרוב" };
-  const S_BG: Record<string, string>    = { open: "var(--open-bg)",  full: "var(--full-bg)",   soon: "var(--soon-bg)" };
-  const S_FG: Record<string, string>    = { open: "var(--open-fg)",  full: "var(--full-fg)",   soon: "var(--soon-fg)" };
+  const { lang } = useLang();
+  const S_LABEL: Record<string, string> = lang === "he"
+    ? { open: "מקומות פנויים", full: "מלא — רשימת המתנה", soon: "נפתח בקרוב" }
+    : { open: "Spots available", full: "Full — Waitlist", soon: "Coming soon" };
+  const S_BG: Record<string, string> = { open: "var(--open-bg)", full: "var(--full-bg)", soon: "var(--soon-bg)" };
+  const S_FG: Record<string, string> = { open: "var(--open-fg)", full: "var(--full-fg)", soon: "var(--soon-fg)" };
 
   return (
     <>
@@ -133,63 +128,52 @@ function DetailSheet({ clinic, onClose }: { clinic: Clinic; onClose: () => void 
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", stiffness: 340, damping: 34 }}
         className="fixed inset-x-0 bottom-0 z-50 overflow-hidden"
-        style={{
-          borderRadius:  "28px 28px 0 0",
-          background:    "#fff",
-          maxHeight:     "88vh",
-          paddingBottom: "max(20px, env(safe-area-inset-bottom))",
-        }}
+        style={{ borderRadius: "28px 28px 0 0", background: "#fff", maxHeight: "88vh", paddingBottom: "max(20px, env(safe-area-inset-bottom))" }}
       >
-        {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full" style={{ background: "var(--line)" }} />
         </div>
 
-        {/* Hero image */}
-        <div className="relative mx-4 overflow-hidden" style={{ height: 200, borderRadius: 20, background: clinic.gradient }}>
+        {/* Hero image — natural, no overlay */}
+        <div className="relative mx-4 overflow-hidden" style={{ height: 200, borderRadius: 20, background: "#111" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={clinic.image} alt={clinic.nameHe} className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.42, mixBlendMode: "overlay" }} />
+          <img src={clinic.image} alt={clinic.nameHe} className="absolute inset-0 w-full h-full object-cover" />
           <button
             onClick={onClose}
             className="absolute top-3 left-3 w-9 h-9 rounded-full flex items-center justify-center text-white text-base border-0"
             style={{ background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)" }}
           >✕</button>
-          <div className="absolute bottom-4 right-4 left-4">
+          <div className="absolute inset-x-0 bottom-0 p-4" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)" }}>
             <div className="text-white font-black text-xl leading-tight" style={{ fontFamily: "var(--font-heebo)" }}>
-              {clinic.flag} {clinic.nameHe}
+              {clinic.flag} {lang === "he" ? clinic.nameHe : clinic.name}
             </div>
-            <div className="text-white/75 text-sm mt-0.5">{clinic.locHe}</div>
+            <div className="text-white/75 text-sm mt-0.5">{lang === "he" ? clinic.locHe : clinic.loc}</div>
           </div>
         </div>
 
-        {/* Scrollable body */}
         <div className="scroll-y px-5 pt-4" style={{ maxHeight: "calc(88vh - 260px)" }}>
-          <div className="flex items-center gap-2 flex-wrap mb-4" style={{ direction: "rtl" }}>
-            <span
-              className="text-xs font-bold px-3 py-1.5 rounded-full"
-              style={{ background: S_BG[clinic.status], color: S_FG[clinic.status] }}
-            >
+          <div className="flex items-center gap-2 flex-wrap mb-4" style={{ direction: lang === "he" ? "rtl" : "ltr" }}>
+            <span className="text-xs font-bold px-3 py-1.5 rounded-full" style={{ background: S_BG[clinic.status], color: S_FG[clinic.status] }}>
               {S_LABEL[clinic.status]}
             </span>
             <span className="text-sm font-semibold" style={{ color: "var(--ink-muted)" }}>
-              {clinic.datesHe}
+              {lang === "he" ? clinic.datesHe : clinic.dates}
             </span>
           </div>
 
-          <p className="text-[15px] leading-relaxed mb-4" style={{ color: "var(--ink-2)", direction: "rtl" }}>
-            {clinic.descHe}
+          <p className="text-[15px] leading-relaxed mb-4" style={{ color: "var(--ink-2)", direction: lang === "he" ? "rtl" : "ltr" }}>
+            {lang === "he" ? clinic.descHe : clinic.desc}
           </p>
 
-          <div className="flex flex-wrap gap-2 mb-6" style={{ direction: "rtl" }}>
-            {clinic.tagsHe.map((t) => (
-              <span key={t} className="text-[11px] font-bold px-3 py-1.5 rounded-full" style={{ background: "var(--canvas-soft)", color: "var(--ink-2)" }}>
-                {t}
+          <div className="flex flex-wrap gap-2 mb-6" style={{ direction: lang === "he" ? "rtl" : "ltr" }}>
+            {(lang === "he" ? clinic.tagsHe : clinic.tags).map((tag) => (
+              <span key={tag} className="text-[11px] font-bold px-3 py-1.5 rounded-full" style={{ background: "var(--canvas-soft)", color: "var(--ink-2)" }}>
+                {tag}
               </span>
             ))}
           </div>
         </div>
 
-        {/* CTA — pinned above safe-area */}
         <div className="px-5 pt-2">
           <a
             href={wa(clinic.waMsg)}
@@ -198,7 +182,9 @@ function DetailSheet({ clinic, onClose }: { clinic: Clinic; onClose: () => void 
             className="flex items-center justify-center gap-2 w-full rounded-2xl py-4 text-white font-black text-base no-underline"
             style={{ background: clinic.gradient }}
           >
-            💬 {clinic.status === "full" ? "הצטרפות לרשימת המתנה" : "שלח הודעה לעומר"}
+            💬 {clinic.status === "full"
+              ? (lang === "he" ? "הצטרפות לרשימת המתנה" : "Join Waitlist")
+              : (lang === "he" ? "שלח הודעה לעומר" : "Message Omer")}
           </a>
         </div>
       </motion.div>
@@ -207,12 +193,12 @@ function DetailSheet({ clinic, onClose }: { clinic: Clinic; onClose: () => void 
 }
 
 export function StageView() {
+  const { lang } = useLang();
   const [selected, setSelected] = useState<Clinic | null>(null);
 
   return (
     <div className="relative h-full overflow-hidden" style={{ background: "var(--canvas)" }}>
 
-      {/* Big headline — safe area aware */}
       <div
         className="absolute inset-x-0 top-0 z-20 px-5 pointer-events-none"
         style={{ paddingTop: "max(56px, calc(var(--sat) + 44px))", direction: "rtl" }}
@@ -224,35 +210,20 @@ export function StageView() {
         >
           <div
             className="font-black leading-none"
-            style={{
-              fontSize:      "clamp(54px, 17vw, 80px)",
-              letterSpacing: "-0.03em",
-              color:         "var(--ink)",
-              fontFamily:    "var(--font-heebo)",
-            }}
+            style={{ fontSize: "clamp(54px, 17vw, 80px)", letterSpacing: "-0.03em", color: "var(--ink)", fontFamily: "var(--font-heebo)" }}
           >
-            בחר את
+            {lang === "he" ? "בחר את" : "Choose"}
           </div>
           <div
             className="font-black leading-none"
-            style={{
-              fontSize:        "clamp(54px, 17vw, 80px)",
-              letterSpacing:   "-0.03em",
-              fontFamily:      "var(--font-heebo)",
-              WebkitTextStroke: "2.5px var(--ink)",
-              color:           "transparent",
-            }}
+            style={{ fontSize: "clamp(54px, 17vw, 80px)", letterSpacing: "-0.03em", fontFamily: "var(--font-heebo)", WebkitTextStroke: "2.5px var(--ink)", color: "transparent" }}
           >
-            הגל שלך
+            {lang === "he" ? "הגל שלך" : "Your Wave"}
           </div>
         </motion.div>
       </div>
 
-      {/* Cards stage — starts below headline */}
-      <div
-        className="absolute inset-x-0 bottom-0"
-        style={{ top: "max(190px, 30%)" }}
-      >
+      <div className="absolute inset-x-0 bottom-0" style={{ top: "max(190px, 30%)" }}>
         {CLINICS.map((clinic, i) => (
           <FloatingCard
             key={clinic.id}
@@ -265,13 +236,11 @@ export function StageView() {
         ))}
       </div>
 
-      {/* Canvas fade at bottom so nav doesn't clash */}
       <div
         className="absolute inset-x-0 bottom-0 z-10 pointer-events-none"
         style={{ height: 120, background: "linear-gradient(to top, var(--canvas) 0%, transparent 100%)" }}
       />
 
-      {/* Hint — fades in after 2s, repeats twice */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: [0, 1, 0] }}
@@ -279,10 +248,9 @@ export function StageView() {
         className="absolute inset-x-0 z-20 text-center text-sm pointer-events-none"
         style={{ bottom: "calc(var(--nav-pad) + 12px)", color: "var(--ink-muted)" }}
       >
-        הקש על כרטיס לפרטים
+        {lang === "he" ? "הקש על כרטיס לפרטים" : "Tap a card for details"}
       </motion.div>
 
-      {/* Detail sheet */}
       <AnimatePresence>
         {selected && (
           <DetailSheet key="sheet" clinic={selected} onClose={() => setSelected(null)} />

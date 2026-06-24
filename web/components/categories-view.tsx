@@ -3,27 +3,31 @@
 import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
 import { CLINICS, type Clinic, type Level, type WaveType } from "@/lib/clinics";
+import { useLang } from "@/lib/lang-context";
 
 type CatId = "all" | "beginner" | "intermediate" | "advanced" | "reef" | "point" | "mellow" | "longboard";
-
-interface Cat { id: CatId; label: string; emoji: string; filter: (c: Clinic) => boolean }
+interface Cat { id: CatId; labelHe: string; labelEn: string; emoji: string; filter: (c: Clinic) => boolean }
 
 const CATS: Cat[] = [
-  { id: "all",          label: "הכל",        emoji: "🌍", filter: () => true },
-  { id: "beginner",     label: "מתחילים",     emoji: "🐣", filter: c => c.levels.includes("beginner"   as Level) },
-  { id: "intermediate", label: "בינוני",      emoji: "🌀", filter: c => c.levels.includes("intermediate" as Level) },
-  { id: "advanced",     label: "מתקדמים",    emoji: "🔥", filter: c => c.levels.includes("advanced"    as Level) },
-  { id: "reef",         label: "גלי ריף",    emoji: "💎", filter: c => c.waves.includes("reef"  as WaveType) },
-  { id: "point",        label: "פוינטברייק", emoji: "➰", filter: c => c.waves.includes("point" as WaveType) },
-  { id: "mellow",       label: "מתון",        emoji: "😌", filter: c => c.waves.includes("mellow" as WaveType) },
-  { id: "longboard",    label: "לונגבורד",   emoji: "🏄", filter: c => c.boards.includes("longboard") },
+  { id: "all",          labelHe: "הכל",        labelEn: "All",          emoji: "🌍", filter: () => true },
+  { id: "beginner",     labelHe: "מתחילים",     labelEn: "Beginner",     emoji: "🐣", filter: c => c.levels.includes("beginner"    as Level) },
+  { id: "intermediate", labelHe: "בינוני",      labelEn: "Intermediate", emoji: "🌀", filter: c => c.levels.includes("intermediate" as Level) },
+  { id: "advanced",     labelHe: "מתקדמים",    labelEn: "Advanced",     emoji: "🔥", filter: c => c.levels.includes("advanced"     as Level) },
+  { id: "reef",         labelHe: "גלי ריף",    labelEn: "Reef breaks",  emoji: "💎", filter: c => c.waves.includes("reef"  as WaveType) },
+  { id: "point",        labelHe: "פוינטברייק", labelEn: "Pointbreak",   emoji: "➰", filter: c => c.waves.includes("point" as WaveType) },
+  { id: "mellow",       labelHe: "מתון",        labelEn: "Mellow",       emoji: "😌", filter: c => c.waves.includes("mellow" as WaveType) },
+  { id: "longboard",    labelHe: "לונגבורד",   labelEn: "Longboard",    emoji: "🏄", filter: c => c.boards.includes("longboard") },
 ];
 
-/* ── Mini sheet for a selected clinic ── */
+/* ── Mini sheet ── */
 function ClinicSheet({ clinic, onClose }: { clinic: Clinic; onClose: () => void }) {
-  const S_LABEL: Record<string, string> = { open: "מקומות פנויים", full: "מלא — רשימת המתנה", soon: "נפתח בקרוב" };
-  const S_BG:    Record<string, string> = { open: "var(--open-bg)",  full: "var(--full-bg)",   soon: "var(--soon-bg)" };
-  const S_FG:    Record<string, string> = { open: "var(--open-fg)",  full: "var(--full-fg)",   soon: "var(--soon-fg)" };
+  const { lang } = useLang();
+  const S_LABEL: Record<string, string> = lang === "he"
+    ? { open: "מקומות פנויים", full: "מלא — רשימת המתנה", soon: "נפתח בקרוב" }
+    : { open: "Spots available", full: "Full — Waitlist", soon: "Coming soon" };
+  const S_BG: Record<string, string> = { open: "var(--open-bg)", full: "var(--full-bg)", soon: "var(--soon-bg)" };
+  const S_FG: Record<string, string> = { open: "var(--open-fg)", full: "var(--full-fg)", soon: "var(--soon-fg)" };
+  const dir = lang === "he" ? "rtl" : "ltr";
 
   return (
     <>
@@ -37,32 +41,28 @@ function ClinicSheet({ clinic, onClose }: { clinic: Clinic; onClose: () => void 
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", stiffness: 340, damping: 34 }}
         className="fixed inset-x-0 bottom-0 z-50 overflow-hidden"
-        style={{
-          borderRadius: "28px 28px 0 0",
-          background: "#fff",
-          maxHeight: "82vh",
-          paddingBottom: "max(20px, env(safe-area-inset-bottom))",
-        }}
+        style={{ borderRadius: "28px 28px 0 0", background: "#fff", maxHeight: "82vh", paddingBottom: "max(20px, env(safe-area-inset-bottom))" }}
       >
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full" style={{ background: "var(--line)" }} />
         </div>
-        <div className="relative mx-4 overflow-hidden" style={{ height: 170, borderRadius: 20, background: clinic.gradient }}>
+        {/* Hero — natural image */}
+        <div className="relative mx-4 overflow-hidden" style={{ height: 170, borderRadius: 20, background: "#111" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={clinic.image} alt={clinic.nameHe} className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.4, mixBlendMode: "overlay" }} />
+          <img src={clinic.image} alt={clinic.nameHe} className="absolute inset-0 w-full h-full object-cover" />
           <button onClick={onClose} className="absolute top-3 left-3 w-9 h-9 rounded-full flex items-center justify-center text-white border-0" style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(8px)" }}>✕</button>
-          <div className="absolute bottom-3 right-4 left-4">
-            <div className="text-white font-black text-xl" style={{ fontFamily: "var(--font-heebo)" }}>{clinic.flag} {clinic.nameHe}</div>
-            <div className="text-white/70 text-sm">{clinic.locHe} · {clinic.datesHe}</div>
+          <div className="absolute inset-x-0 bottom-0 p-3" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)" }}>
+            <div className="text-white font-black text-xl" style={{ fontFamily: "var(--font-heebo)" }}>{clinic.flag} {lang === "he" ? clinic.nameHe : clinic.name}</div>
+            <div className="text-white/70 text-sm">{lang === "he" ? clinic.locHe : clinic.loc} · {lang === "he" ? clinic.datesHe : clinic.dates}</div>
           </div>
         </div>
         <div className="scroll-y px-5 pt-4" style={{ maxHeight: "calc(82vh - 230px)" }}>
-          <div className="flex gap-2 flex-wrap mb-3" style={{ direction: "rtl" }}>
+          <div className="flex gap-2 flex-wrap mb-3" style={{ direction: dir }}>
             <span className="text-xs font-bold px-3 py-1.5 rounded-full" style={{ background: S_BG[clinic.status], color: S_FG[clinic.status] }}>{S_LABEL[clinic.status]}</span>
           </div>
-          <p className="text-[15px] leading-relaxed mb-4" style={{ color: "var(--ink-2)", direction: "rtl" }}>{clinic.descHe}</p>
-          <div className="flex flex-wrap gap-2 mb-4" style={{ direction: "rtl" }}>
-            {clinic.tagsHe.map(t => (
+          <p className="text-[15px] leading-relaxed mb-4" style={{ color: "var(--ink-2)", direction: dir }}>{lang === "he" ? clinic.descHe : clinic.desc}</p>
+          <div className="flex flex-wrap gap-2 mb-4" style={{ direction: dir }}>
+            {(lang === "he" ? clinic.tagsHe : clinic.tags).map(t => (
               <span key={t} className="text-[11px] font-bold px-3 py-1.5 rounded-full" style={{ background: "var(--canvas-soft)", color: "var(--ink-2)" }}>{t}</span>
             ))}
           </div>
@@ -74,7 +74,9 @@ function ClinicSheet({ clinic, onClose }: { clinic: Clinic; onClose: () => void 
             className="flex items-center justify-center gap-2 w-full rounded-2xl py-4 text-white font-black text-base no-underline"
             style={{ background: clinic.gradient }}
           >
-            💬 {clinic.status === "full" ? "רשימת המתנה" : "שלח הודעה לעומר"}
+            💬 {clinic.status === "full"
+              ? (lang === "he" ? "רשימת המתנה" : "Join Waitlist")
+              : (lang === "he" ? "שלח הודעה לעומר" : "Message Omer")}
           </a>
         </div>
       </motion.div>
@@ -84,10 +86,13 @@ function ClinicSheet({ clinic, onClose }: { clinic: Clinic; onClose: () => void 
 
 /* ── Clinic row ── */
 function ClinicRow({ clinic, index }: { clinic: Clinic; index: number }) {
+  const { lang } = useLang();
   const [open, setOpen] = useState(false);
-  const S_BG: Record<string, string> = { open: "var(--open-bg)", full: "var(--full-bg)", soon: "var(--soon-bg)" };
-  const S_FG: Record<string, string> = { open: "var(--open-fg)", full: "var(--full-fg)", soon: "var(--soon-fg)" };
-  const S_LBL: Record<string, string> = { open: "פנוי", full: "מלא", soon: "בקרוב" };
+  const S_BG: Record<string, string>  = { open: "var(--open-bg)", full: "var(--full-bg)", soon: "var(--soon-bg)" };
+  const S_FG: Record<string, string>  = { open: "var(--open-fg)", full: "var(--full-fg)", soon: "var(--soon-fg)" };
+  const S_LBL: Record<string, string> = lang === "he"
+    ? { open: "פנוי", full: "מלא", soon: "בקרוב" }
+    : { open: "Open", full: "Full", soon: "Soon" };
 
   return (
     <>
@@ -98,28 +103,24 @@ function ClinicRow({ clinic, index }: { clinic: Clinic; index: number }) {
         whileTap={{ scale: 0.98 }}
         onClick={() => setOpen(true)}
         className="w-full flex items-center gap-3 rounded-2xl p-4 text-right border-0 cursor-pointer"
-        style={{ background: "var(--surface)", border: "1px solid var(--line)", direction: "rtl" }}
+        style={{ background: "var(--surface)", border: "1px solid var(--line)", direction: lang === "he" ? "rtl" : "ltr" }}
       >
-        {/* Colour strip */}
         <div className="w-1 self-stretch rounded-full flex-shrink-0" style={{ background: clinic.accentColor }} />
 
-        {/* Thumb */}
-        <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0" style={{ background: clinic.gradient }}>
+        {/* Natural image thumb */}
+        <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0" style={{ background: "#111" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={clinic.image} alt="" className="w-full h-full object-cover" style={{ opacity: 0.7, mixBlendMode: "overlay" }} />
+          <img src={clinic.image} alt="" className="w-full h-full object-cover" />
         </div>
 
         <div className="flex-1 min-w-0 text-right">
           <div className="font-bold text-[15px] truncate" style={{ color: "var(--ink)" }}>
-            {clinic.flag} {clinic.nameHe}
+            {clinic.flag} {lang === "he" ? clinic.nameHe : clinic.name}
           </div>
-          <div className="text-xs mt-0.5" style={{ color: "var(--ink-muted)" }}>{clinic.datesHe}</div>
+          <div className="text-xs mt-0.5" style={{ color: "var(--ink-muted)" }}>{lang === "he" ? clinic.datesHe : clinic.dates}</div>
         </div>
 
-        <span
-          className="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0"
-          style={{ background: S_BG[clinic.status], color: S_FG[clinic.status] }}
-        >
+        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0" style={{ background: S_BG[clinic.status], color: S_FG[clinic.status] }}>
           {S_LBL[clinic.status]}
         </span>
       </motion.button>
@@ -132,35 +133,26 @@ function ClinicRow({ clinic, index }: { clinic: Clinic; index: number }) {
 }
 
 export function CategoriesView() {
+  const { lang } = useLang();
   const [active, setActive] = useState<CatId>("all");
   const cat     = CATS.find(c => c.id === active)!;
   const visible = CLINICS.filter(cat.filter);
+  const catLabel = lang === "he" ? cat.labelHe : cat.labelEn;
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ background: "var(--canvas)" }}>
 
-      {/* Header */}
-      <div
-        className="px-5 pb-3 flex-shrink-0"
-        style={{ paddingTop: "max(56px, calc(var(--sat) + 44px))", direction: "rtl" }}
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <h1
-            className="font-black text-[38px] leading-tight"
-            style={{ color: "var(--ink)", fontFamily: "var(--font-heebo)", letterSpacing: "-0.025em" }}
-          >
-            יעדים
+      <div className="px-5 pb-3 flex-shrink-0" style={{ paddingTop: "max(56px, calc(var(--sat) + 44px))", direction: "rtl" }}>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+          <h1 className="font-black text-[38px] leading-tight" style={{ color: "var(--ink)", fontFamily: "var(--font-heebo)", letterSpacing: "-0.025em" }}>
+            {lang === "he" ? "יעדים" : "Destinations"}
           </h1>
           <p className="text-sm mt-0.5" style={{ color: "var(--ink-muted)" }}>
-            {CLINICS.length} טיולים · 5 יעדים · 2026–2027
+            {CLINICS.length} {lang === "he" ? "טיולים · 5 יעדים · 2026–2027" : "trips · 5 destinations · 2026–2027"}
           </p>
         </motion.div>
       </div>
 
-      {/* Category chips — horizontal scroll, momentum */}
       <div className="scroll-x flex-shrink-0 pb-3" style={{ direction: "rtl" }}>
         <div className="flex gap-2 px-5" style={{ width: "max-content" }}>
           {CATS.map((c, i) => {
@@ -174,21 +166,11 @@ export function CategoriesView() {
                 whileTap={{ scale: 0.93 }}
                 onClick={() => setActive(c.id)}
                 className="flex items-center gap-2 rounded-full px-5 h-10 text-sm font-bold flex-shrink-0 border-0 cursor-pointer"
-                style={{
-                  background: on ? "var(--ink)" : "var(--surface)",
-                  color:      on ? "var(--canvas)" : "var(--ink-2)",
-                  border:     `1px solid ${on ? "transparent" : "var(--line)"}`,
-                }}
+                style={{ background: on ? "var(--ink)" : "var(--surface)", color: on ? "var(--canvas)" : "var(--ink-2)", border: `1px solid ${on ? "transparent" : "var(--line)"}` }}
               >
                 <span>{c.emoji}</span>
-                <span>{c.label}</span>
-                <span
-                  className="text-[11px] px-2 py-0.5 rounded-full"
-                  style={{
-                    background: on ? "rgba(255,255,255,0.18)" : "var(--canvas-soft)",
-                    color:      on ? "#fff" : "var(--ink-muted)",
-                  }}
-                >
+                <span>{lang === "he" ? c.labelHe : c.labelEn}</span>
+                <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: on ? "rgba(255,255,255,0.18)" : "var(--canvas-soft)", color: on ? "#fff" : "var(--ink-muted)" }}>
                   {CLINICS.filter(c.filter).length}
                 </span>
               </motion.button>
@@ -197,51 +179,30 @@ export function CategoriesView() {
         </div>
       </div>
 
-      {/* Active category banner */}
+      {/* Category banner */}
       <motion.div
         key={active}
         initial={{ opacity: 0, scale: 0.97 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.28 }}
         className="mx-5 mb-4 flex-shrink-0 rounded-3xl overflow-hidden relative"
-        style={{
-          height:     120,
-          background: active !== "all" ? "var(--ink)" : "var(--surface)",
-          border:     `1px solid var(--line)`,
-        }}
+        style={{ height: 120, background: active !== "all" ? "var(--ink)" : "var(--surface)", border: "1px solid var(--line)" }}
       >
-        {/* Ghost big text */}
-        <div
-          className="absolute inset-0 flex items-end pb-3 pr-4 font-black leading-none select-none"
-          style={{
-            fontSize:    52,
-            color:       active !== "all" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)",
-            fontFamily:  "var(--font-heebo)",
-            direction:   "rtl",
-          }}
-        >
-          {cat.label}
+        <div className="absolute inset-0 flex items-end pb-3 pr-4 font-black leading-none select-none"
+          style={{ fontSize: 52, color: active !== "all" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)", fontFamily: "var(--font-heebo)", direction: "rtl" }}>
+          {catLabel}
         </div>
-        {/* Foreground */}
         <div className="absolute top-4 right-4" style={{ direction: "rtl" }}>
-          <div
-            className="font-black text-[22px]"
-            style={{ color: active !== "all" ? "#fff" : "var(--ink)", fontFamily: "var(--font-heebo)" }}
-          >
-            {cat.emoji} {cat.label}
+          <div className="font-black text-[22px]" style={{ color: active !== "all" ? "#fff" : "var(--ink)", fontFamily: "var(--font-heebo)" }}>
+            {cat.emoji} {catLabel}
           </div>
           <div className="text-sm mt-0.5" style={{ color: active !== "all" ? "rgba(255,255,255,0.55)" : "var(--ink-muted)" }}>
-            {visible.length} טיולים מתאימים
+            {visible.length} {lang === "he" ? "טיולים מתאימים" : "matching trips"}
           </div>
         </div>
-        {/* Mini photo stack */}
         <div className="absolute bottom-4 left-4 flex">
           {visible.slice(0, 4).map((c, i) => (
-            <div
-              key={c.id}
-              className="w-9 h-9 rounded-full overflow-hidden border-2 border-white/40"
-              style={{ marginLeft: i > 0 ? -10 : 0, zIndex: 4 - i }}
-            >
+            <div key={c.id} className="w-9 h-9 rounded-full overflow-hidden border-2 border-white/40" style={{ marginLeft: i > 0 ? -10 : 0, zIndex: 4 - i }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={c.image} alt="" className="w-full h-full object-cover" />
             </div>
@@ -249,7 +210,6 @@ export function CategoriesView() {
         </div>
       </motion.div>
 
-      {/* Clinic list */}
       <div className="scroll-y flex-1 px-5" style={{ paddingBottom: "var(--nav-pad)" }}>
         <AnimatePresence mode="popLayout">
           <div className="flex flex-col gap-3">
@@ -258,7 +218,7 @@ export function CategoriesView() {
             ))}
             {visible.length === 0 && (
               <div className="text-center py-12 text-sm" style={{ color: "var(--ink-muted)" }}>
-                אין טיולים מתאימים
+                {lang === "he" ? "אין טיולים מתאימים" : "No matching trips"}
               </div>
             )}
           </div>
